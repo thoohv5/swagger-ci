@@ -71,7 +71,7 @@ func (p *Parameter) SetBody(body io.Reader) {
 type Method string
 
 const (
-	DefaultTimeOut        = 10 * time.Second
+	DefaultTimeOut        = 3 * time.Second
 	MethodPost     Method = "POST"
 	MethodGet      Method = "GET"
 	MethodPut      Method = "PUT"
