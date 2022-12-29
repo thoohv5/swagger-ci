@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	netHttp "net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/bxcodec/faker/v4"
@@ -30,14 +31,15 @@ func main() {
 	if err := http.Get(context.Background(), swaggerUrl, swagger, http.WithTLSClientConfig(&tls.Config{
 		InsecureSkipVerify: true,
 	})); err != nil {
-		fmt.Println("swagger url err", err)
-		return
+		fmt.Printf("\u001B[0;31m swagger url err, err :%v\n", err)
+		os.Exit(1)
 	}
 
 	// 拼接url
 	urlParam, err := url.Parse(swaggerUrl)
 	if err != nil {
-		return
+		fmt.Printf("\u001B[0;31m swagger url parse err, err :%v\n", err)
+		os.Exit(1)
 	}
 	host := fmt.Sprintf("%s://%s", urlParam.Scheme, urlParam.Host)
 
@@ -109,32 +111,37 @@ func main() {
 				if err = http.Get(context.Background(), fmt.Sprintf("%s%s", host, url), &ret, http.WithParam(param), http.WithTLSClientConfig(&tls.Config{
 					InsecureSkipVerify: true,
 				}), http.WithResponse(resp), http.WithLog(&defaultLog{})); err != nil {
-					panic(err)
+					fmt.Printf("\u001B[0;31m get err, err :%v\n", err)
+					os.Exit(1)
 				}
 			case "post":
 				if err = http.Post(context.Background(), fmt.Sprintf("%s%s", host, url), param, &ret, http.WithTLSClientConfig(&tls.Config{
 					InsecureSkipVerify: true,
 				}), http.WithResponse(resp), http.WithLog(&defaultLog{})); err != nil {
-					panic(err)
+					fmt.Printf("\u001B[0;31m post err, err :%v\n", err)
+					os.Exit(1)
 				}
 			case "put":
 				if err = http.Put(context.Background(), fmt.Sprintf("%s%s", host, url), param, &ret, http.WithTLSClientConfig(&tls.Config{
 					InsecureSkipVerify: true,
 				}), http.WithResponse(resp), http.WithLog(&defaultLog{})); err != nil {
-					panic(err)
+					fmt.Printf("\u001B[0;31m put err, err :%v\n", err)
+					os.Exit(1)
 				}
 			case "delete":
 				if err = http.Delete(context.Background(), fmt.Sprintf("%s%s", host, url), &ret, http.WithParam(param), http.WithTLSClientConfig(&tls.Config{
 					InsecureSkipVerify: true,
 				}), http.WithResponse(resp), http.WithLog(&defaultLog{})); err != nil {
-					panic(err)
+					fmt.Printf("\u001B[0;31m delete err, err :%v\n", err)
+					os.Exit(1)
 				}
 			}
 
 			if resp.StatusCode == netHttp.StatusOK || resp.StatusCode == netHttp.StatusBadRequest && (ret["code"] == "10010100003" || ret["code"] == "10010100002") {
 				fmt.Printf("method: %s, ret:%v, resp:%v\n", method, ret, resp.StatusCode)
 			} else {
-				panic(fmt.Sprintf("\033[0;31m method: %s, ret:%v, resp:%v\n", method, ret, resp.StatusCode))
+				fmt.Printf("\033[0;31m method: %s, ret:%v, resp:%v\n", method, ret, resp.StatusCode)
+				os.Exit(1)
 			}
 		}
 	}
